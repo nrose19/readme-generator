@@ -1,5 +1,7 @@
 // TODO: Include packages needed for this application
 const inquirer = require('inquirer');
+const util = require('util');
+const fs = require('fs');
 const markdown = require('./utils/generateMarkdown');
 // TODO: Create an array of questions for user input
 const questions = [
@@ -44,17 +46,12 @@ const questions = [
         type: 'list',
         message: 'Which liscense would you like for this project?',
         choices: [
-            'Apache',
-            'Boost',
             'BSD',
-            'Creative Commons',
-            'Eclipse',
+            'Boost',
             'GNU',
-            'IBM',
-            'MIT',
-            'ISC',
             'Mozilla',
-            'SIL',
+            'MIT',
+            'Apache',
         ],
         name: 'liscense',
     },
@@ -70,15 +67,31 @@ const questions = [
         message: 'Enter your email Address: ',
         name: 'emailAddress',
     }
-];
+]
 
 // TODO: Create a function to write README file
 function writeToFile(fileName, data) {
-
+    fs.writeFile(fileName, data, err => {
+        if (err) {
+          return console.log(err);
+        }
+        console.log("Success!")
+    });
 }
 
+const writeFileAsync = util.promisify(writeToFile);
+
 // TODO: Create a function to initialize app
-function init() {}
+async function init() {
+    try {
+        const userInput = await inquirer.prompt(questions);
+        let readmeResponse = markdown(userInput);
+        await writeFileAsync('created-readme.md', readmeResponse);
+    } catch (err) {
+        throw err;
+    }
+
+}
 
 // Function call to initialize app
 init();
